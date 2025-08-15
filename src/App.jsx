@@ -6,7 +6,8 @@ import ProductList from './components/productList';   // file is productList.jsx
 import UserList from './pages/UserList.jsx';     // file is UserList.jsx
 import Login from './pages/Login.jsx';                // file is Login.jsx
 import Register from './pages/register.jsx';          // file is Register.jsx
-import Dashboard from "./pages/dashboard"; // ✅ Make sure this file exists
+import Dashboard from "./pages/user-dashboard.jsx"; // ✅ Make sure this file exists
+import AdminDashboard from "./pages/admin-dashboard.jsx"; // ✅ Make sure this file exists
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 function Home() {
@@ -27,7 +28,11 @@ export default function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/user-dashboard" element={<Dashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
+       
+
 
         {/* Optional 404 fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />

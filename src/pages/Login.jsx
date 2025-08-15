@@ -25,6 +25,7 @@ export default function Login() {
       });
 
       const data = await response.json();
+      localStorage.setItem('role', data.role);   // Store the user's role
 
       if (!response.ok) {
 
@@ -33,7 +34,9 @@ export default function Login() {
       }
     
       if (data.message == "Login successful"){
+    
         localStorage.setItem("token", data.token); 
+
        if (data.user.role === "admin") {
          navigate("/admin-dashboard");
               } else {
