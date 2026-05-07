@@ -1,19 +1,22 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+// src/App.jsx
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import './App.css';
-// ⚠️ Case matters on many systems. Match the filenames exactly:
-import ProductList from './components/productList';   // file is productList.jsx in your tree
-import UserList from './pages/UserList.jsx';     // file is UserList.jsx
-import Login from './pages/Login.jsx';                // file is Login.jsx
-import Register from './pages/register.jsx';          // file is Register.jsx
-import Dashboard from "./pages/user-dashboard.jsx"; // ✅ Make sure this file exists
-import AdminDashboard from "./pages/admin-dashboard.jsx"; // ✅ Make sure this file exists
-import '@fortawesome/fontawesome-free/css/all.min.css';
+
+import ProductManagement from './components/ProductManagement.jsx';
+import LandingPage from './pages/LandingPage.jsx';
+import UserList from './pages/UserList.jsx';
+import Login from './pages/Login.jsx';
+import Register from './pages/register.jsx';
+import Dashboard from "./pages/user-dashboard.jsx";
+import AdminDashboard from "./pages/admin-dashboard.jsx";
+import StockReport from './pages/StockReport.jsx';
+import PrivateRoute from './components/PrivateRoute.jsx';
 
 function Home() {
   return (
     <div>
-      <ProductList />
+      <ProductManagement />
       <UserList />
     </div>
   );
@@ -23,19 +26,48 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Default to /login; change to <Home /> if you prefer */}
-       <Route path="/" element={<Navigate to="/login" replace />} />
+master
+        {/* Landing / Home */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/home" element={<Home />} />
+
+        {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/user-dashboard" element={<Dashboard />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
-       
+        {/* User Dashboard */}
+        <Route
+          path="/user-dashboard"
+          element={
+            <PrivateRoute allowedRoles={["user"]}>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
 
+        {/* Admin Dashboard */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <PrivateRoute allowedRoles={["admin", "superadmin"]}>
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
 
-        {/* Optional 404 fallback */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Stock Report (Admin/User) */}
+        <Route
+          path="/StockReport"
+          element={
+            <PrivateRoute allowedRoles={["user", "admin", "superadmin"]}>
+              <StockReport />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Fallback for unmatched routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+
       </Routes>
     </BrowserRouter>
   );
