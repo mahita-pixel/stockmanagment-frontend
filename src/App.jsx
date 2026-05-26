@@ -12,6 +12,7 @@ import Dashboard from "./pages/user-dashboard.jsx";
 import AdminDashboard from "./pages/admin-dashboard.jsx";
 import StockReport from './pages/StockReport.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
+import AddItem from "./pages/AddItem";
 
 function Home() {
   return (
@@ -34,6 +35,7 @@ master
         {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/add-item" element={<AddItem />} />
 
         {/* User Dashboard */}
         <Route
@@ -66,7 +68,6 @@ master
         />
 
         {/* Fallback for unmatched routes */}
-        <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
     </BrowserRouter>

@@ -1,110 +1,262 @@
-// src/pages/Dashboard.jsx
-import { useEffect } from "react";
+// src/pages/user-dashboard.jsx
+
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import {
+  FaBoxOpen,
+  FaShoppingCart,
+  FaChartLine,
+  FaWarehouse,
+  FaPlus,
+  FaSignOutAlt,
+} from "react-icons/fa";
+
+import AddItem from "./AddItem";
+import { getProducts } from "../Api/api";
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  const [activePage, setActivePage] = useState("dashboard");
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // ================= LOAD PRODUCTS =================
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getProducts();
+
+      const data =
+        res?.data?.products ||
+        res?.data ||
+        [];
+
+      setProducts(Array.isArray(data) ? data : []);
+
+    } catch (error) {
+      console.error("Error loading products:", error);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ================= AUTH CHECK =================
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (!token) {
-      // 🚫 If no token, redirect to login
       navigate("/login");
+      return;
     }
-  }, []);
+
+    loadProducts();
+  }, [navigate]);
+
+  const safePage = activePage || "dashboard";
+
+  // ================= STATS =================
+  const stats = [
+    {
+      title: "Inventory",
+      value: products.length,
+      icon: <FaWarehouse />,
+    },
+    {
+      title: "Orders",
+      value: 34,
+      icon: <FaShoppingCart />,
+    },
+    {
+      title: "Reports",
+      value: 12,
+      icon: <FaChartLine />,
+    },
+    {
+      title: "Products",
+      value: products.length,
+      icon: <FaBoxOpen />,
+    },
+  ];
 
   return (
-    <div>
-    
-      <div class="bg-teal-500">
-  <div class="min-h-screen flex justify-center items-center bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100">
+    <div className="flex min-h-screen bg-gray-100">
 
-  
-    <div class="flex w-full max-w-screen-xl bg-white shadow-xl rounded-lg overflow-hidden">
+      {/* ================= SIDEBAR ================= */}
+      <aside className="w-64 bg-cyan-900 text-white p-6 flex flex-col">
 
-      <div class="w-64 bg-gradient-to-b from-teal-500 to-blue-700 text-white p-6">
-        <h2 class="text-2xl font-bold mb-8">Stock Manager</h2>
-       
-<nav class="space-y-4">
-  <a href="#" class="block py-2.5 px-4 rounded-lg text-white transition-all duration-300 ease-in-out transform hover:bg-blue-600 hover:scale-105 hover:shadow-lg">
-    Dashboard
-  </a>
-  <a href="#" class="block py-2.5 px-4 rounded-lg text-white transition-all duration-300 ease-in-out transform hover:bg-blue-600 hover:scale-105 hover:shadow-lg">
-    Inventory
-  </a>
-  <a href="#" class="block py-2.5 px-4 rounded-lg text-white transition-all duration-300 ease-in-out transform hover:bg-blue-600 hover:scale-105 hover:shadow-lg">
-    Orders
-  </a>
-  <a href="#" class="block py-2.5 px-4 rounded-lg text-white transition-all duration-300 ease-in-out transform hover:bg-blue-600 hover:scale-105 hover:shadow-lg">
-    Reports
-  </a>
-</nav>
+        <h1 className="text-2xl font-bold mb-6">
+          User Panel
+        </h1>
 
-      </div>
+        {["dashboard", "inventory", "orders", "reports"].map((page) => (
+          <button
+            key={page}
+            onClick={() => setActivePage(page)}
+            className={`mb-2 w-full text-left px-4 py-2 rounded font-medium transition ${
+              safePage === page ? "bg-cyan-700" : "hover:bg-cyan-800"
+            }`}
+          >
+            {page.charAt(0).toUpperCase() + page.slice(1)}
+          </button>
+        ))}
 
-      <div class="flex-1 p-8">
+      </aside>
 
-        <div class="flex justify-between items-center mb-8">
-          <h1 class="text-4xl font-semibold text-gray-800">Dashboard</h1>
-          <div class="flex items-center space-x-4">
-            <button class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition">Add Item</button>
-            <button class="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600 transition">Logout</button>
+      {/* ================= MAIN CONTENT ================= */}
+      <main className="flex-1 p-6">
+
+        {/* ================= TOP BAR ================= */}
+        <div className="flex justify-between items-center mb-6">
+
+          <h2 className="text-3xl font-bold text-gray-800">
+            {safePage.charAt(0).toUpperCase() + safePage.slice(1)}
+          </h2>
+
+          <div className="flex gap-4">
+
+            {/* ADD ITEM */}
+            <button
+              onClick={() => setActivePage("add-item")}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition"
+            >
+              <FaPlus />
+              Add Item
+            </button>
+
+            {/* PDF DOWNLOAD */}
+            <button
+              onClick={() =>
+                window.open(
+                  "http://localhost:5000/reports/inventory/pdf",
+                  "_blank"
+                )
+              }
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              Download PDF
+            </button>
+
+            {/* LOGOUT */}
+            <button
+              onClick={() => {
+                localStorage.removeItem("token");
+                navigate("/login");
+              }}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-700 transition"
+            >
+              <FaSignOutAlt />
+              Logout
+            </button>
+
           </div>
+
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition">
-            <h3 class="text-xl font-semibold text-gray-700">Total Stock</h3>
-            <p class="text-3xl font-bold text-gray-900">1,234</p>
-          </div>
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition">
-            <h3 class="text-xl font-semibold text-gray-700">Low Stock Items</h3>
-            <p class="text-3xl font-bold text-gray-900">12</p>
-          </div>
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition">
-            <h3 class="text-xl font-semibold text-gray-700">Orders Today</h3>
-            <p class="text-3xl font-bold text-gray-900">56</p>
-          </div>
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition">
-            <h3 class="text-xl font-semibold text-gray-700">restocked items </h3>
-            <p class="text-3xl font-bold text-gray-900">21</p>
-          </div>
-        </div>
+        {/* ================= DASHBOARD ================= */}
+        {safePage === "dashboard" && (
+          <div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-xl font-semibold text-gray-700 mb-4">Recent Activity</h3>
-          <ul class="space-y-4">
-            <li class="flex justify-between items-center border-b pb-4">
-              <div class="flex items-center space-x-2">
-                <span class="font-semibold text-gray-800">Added 50 units of Item A</span>
-                <span class="text-sm text-gray-500">2 hours ago</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+              {stats.map((s, i) => (
+                <div
+                  key={i}
+                  className="bg-white p-6 rounded-2xl shadow flex items-center space-x-4 hover:scale-105 transform transition"
+                >
+                  <div className="text-4xl text-cyan-600">
+                    {s.icon}
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500">{s.title}</p>
+                    <p className="font-bold text-xl">{s.value}</p>
+                  </div>
+                </div>
+              ))}
+
+            </div>
+
+          </div>
+        )}
+
+        {/* ================= INVENTORY ================= */}
+        {safePage === "inventory" && (
+          <div className="bg-white p-6 rounded-2xl shadow">
+
+            <h2 className="text-3xl font-bold mb-6">
+              Inventory
+            </h2>
+
+            {loading ? (
+              <p>Loading products...</p>
+            ) : products.length > 0 ? (
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                {products.map((product) => (
+                  <div
+                    key={product._id}
+                    className="border rounded-xl p-4 shadow hover:shadow-lg transition"
+                  >
+                    <h3 className="text-xl font-bold mb-2">
+                      {product.name ||
+                       product.productName ||
+                       product.title ||
+                       "Unnamed Product"}
+                    </h3>
+
+                    <p className="text-gray-600">
+                      Quantity: {product.quantity}
+                    </p>
+
+                    <p className="text-gray-600">
+                      Price: ${product.price}
+                    </p>
+                  </div>
+                ))}
+
               </div>
-              <button class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">View</button>
-            </li>
-            <li class="flex justify-between items-center border-b pb-4">
-              <div class="flex items-center space-x-2">
-                <span class="font-semibold text-gray-800">Sold 30 units of Item B</span>
-                <span class="text-sm text-gray-500">5 hours ago</span>
-              </div>
-              <button class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">View</button>
-            </li>
-            <li class="flex justify-between items-center">
-              <div class="flex items-center space-x-2">
-                <span class="font-semibold text-gray-800">Restocked 100 units of Item C</span>
-                <span class="text-sm text-gray-500">1 day ago</span>
-              </div>
-              <button class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">View</button>
-            </li>
-          </ul>
-        </div>
 
-      </div>
+            ) : (
+              <p className="text-gray-500">No products found.</p>
+            )}
 
-    </div>
+          </div>
+        )}
 
-  </div>
-</div>
-      {/* You can also fetch protected API data here */}
+        {/* ================= ORDERS ================= */}
+        {safePage === "orders" && (
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <h2 className="text-3xl font-bold mb-4">Orders</h2>
+            <p className="text-gray-600">Orders will appear here.</p>
+          </div>
+        )}
+
+        {/* ================= REPORTS ================= */}
+        {safePage === "reports" && (
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <h2 className="text-3xl font-bold mb-4">Reports</h2>
+            <p className="text-gray-600">Reports will appear here.</p>
+          </div>
+        )}
+
+        {/* ================= ADD ITEM ================= */}
+        {safePage === "add-item" && (
+          <div className="bg-white p-6 rounded-2xl shadow">
+
+            <AddItem
+              refreshProducts={loadProducts}
+              goToInventory={() => setActivePage("inventory")}
+            />
+
+          </div>
+        )}
+
+      </main>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/",
+  baseURL: "http://localhost:5000",
   withCredentials: true,
 });
 
@@ -16,7 +16,7 @@ API.interceptors.request.use((config) => {
 
 // ================= USERS =================
 export const getUsers = () => API.get("/users");
-export const addUser = (data) => API.post("/users", data);
+export const addUser = (data) => API.post("users/register", data);
 export const updateUser = (id, data) => API.put(`/users/${id}`, data);
 
 // ================= PRODUCTS =================
