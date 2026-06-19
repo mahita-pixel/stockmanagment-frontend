@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { getProducts, addProduct, updateProduct, deleteProduct } from "../Api/api";
-import axios from "axios";
 
 export default function ProductManagement() {
   const [products, setProducts] = useState([]);
